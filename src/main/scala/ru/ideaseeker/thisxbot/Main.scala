@@ -10,7 +10,6 @@ import scala.concurrent.Future
 
 object ThisXDoesNotExistBot extends TelegramBot
     with Polling
-    with Callbacks[Future]
     with Commands[Future]
     with ChatActions[Future] {
 

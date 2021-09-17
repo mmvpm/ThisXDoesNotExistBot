@@ -1,18 +1,17 @@
 package ru.ideaseeker.thisxbot
 
+import org.scalatest.flatspec.AnyFlatSpec
 import ru.ideaseeker.thisxbot.strategies._
 
-import org.scalatest.funsuite.AnyFunSuite
+class BotTest extends AnyFlatSpec {
 
-class BotTest extends AnyFunSuite {
-
-    test("valid input in Context.setStrategy") {
-        assert(Context.getStrategies.forall { case (name, _) =>
-            Context.setStrategy(name)
-        })
+    "Context" should "set strategy on valid input" in {
+        Context.getStrategies.foreach { case (name, _) =>
+            assert(Context.setStrategy(name))
+        }
     }
 
-    test("invalid input in Context.setStrategy") {
+    it should "not set strategy on invalid input" in {
         val inputs = List(
             "aaaaa",
             "abcdefg",
@@ -20,39 +19,29 @@ class BotTest extends AnyFunSuite {
             "123456",
             "hyT3ieDf01y"
         )
-        assert(inputs.forall { name =>
-            !Context.setStrategy(name)
-        })
+        inputs.foreach{ name =>
+            assert(!Context.setStrategy(name))
+        }
     }
 
-    // otherwise, the Error 404 probably occurred and we have not an image
-    private val minimumPictureSize = 8 * 1024
+    "Pictures" should "have size > minimum picture size (8192 bytes)" in {
+        val strategies = List(
+            AnimeStrategy,
+            ArtStrategy,
+            CatStrategy,
+            FursonaStrategy,
+            PersonStrategy,
+            PonyStrategy,
+            WaifuStrategy
+        )
+        // otherwise, the Error 404 probably occurred and we have not an image
+        val minimumPictureSize = 8192
 
-    test("size of AnimeStrategy.get") {
-        assert(AnimeStrategy.get.length > minimumPictureSize)
-    }
-
-    test("size of ArtStrategy.get") {
-        assert(ArtStrategy.get.length > minimumPictureSize)
-    }
-
-    test("size of CatStrategy.get") {
-        assert(CatStrategy.get.length > minimumPictureSize)
-    }
-
-    test("size of FursonaStrategy.get") {
-        assert(FursonaStrategy.get.length > minimumPictureSize)
-    }
-
-    test("size of PersonStrategy.get") {
-        assert(PersonStrategy.get.length > minimumPictureSize)
-    }
-
-    test("size of PonyStrategy.get") {
-        assert(PonyStrategy.get.length > minimumPictureSize)
-    }
-
-    test("size of WaifuStrategy") {
-        assert(WaifuStrategy.get.length > minimumPictureSize)
+        strategies.foreach { strategy =>
+            assert(
+                strategy.get.length > minimumPictureSize,
+                s"(error with ${strategy.getClass})"
+            )
+        }
     }
 }

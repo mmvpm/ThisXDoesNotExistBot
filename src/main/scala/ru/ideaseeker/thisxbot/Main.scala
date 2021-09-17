@@ -17,25 +17,26 @@ object ThisXDoesNotExistBot extends TelegramBot
     override val client: RequestHandler[Future] = new ScalajHttpClient(token)
 
     onMessage { implicit message =>
-        val isCorrectResponse = message.text match {
-            case Some(text) =>
-                Context.setStrategy(
-                    // handles both options: /command and command
-                    text.toLowerCase.filter(_ != '/')
-                )
-            case None => false
+        Future {
+            val isCorrectResponse = message.text match {
+                case Some(text) =>
+                    Context.setStrategy(
+                        // handles both options: /command and command
+                        text.toLowerCase.filter(_ != '/')
+                    )
+                case None => false
+            }
+            if (!isCorrectResponse) {
+                request(SendMessage(message.source, helpMessage))
+            }
+            else {
+                uploadingPhoto
+                request(SendPhoto(message.source, Context.getPicture))
+            }
         }
-        if (!isCorrectResponse) {
-            request(SendMessage(message.source, getHelp))
-        }
-        else {
-            uploadingPhoto
-            request(SendPhoto(message.source, Context.getPicture))
-        }
-        Future.successful()
     }
 
-    private val getHelp: String =
+    private val helpMessage =
         Context.getStrategies.map {
             case (name, _) => s"- $name"
         }.toList.sorted.mkString(
@@ -45,11 +46,8 @@ object ThisXDoesNotExistBot extends TelegramBot
         )
 }
 
-object Main {
-
-    def main(args: Array[String]): Unit = {
-        ThisXDoesNotExistBot.run()
-        scala.io.StdIn.readLine("Press [Enter] to shutdown the bot")
-        ThisXDoesNotExistBot.shutdown()
-    }
+object Main extends App {
+    ThisXDoesNotExistBot.run()
+    scala.io.StdIn.readLine("Press [Enter] to shutdown the bot")
+    ThisXDoesNotExistBot.shutdown()
 }
